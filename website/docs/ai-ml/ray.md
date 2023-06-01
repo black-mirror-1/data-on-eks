@@ -73,7 +73,7 @@ Ensure that you have installed the following tools on your machine. You can use 
 
 ```bash
 git clone https://github.com/black-mirror-1/data-on-eks.git
-git switch -c origin/feat/ray-serve
+git switch -c origin/ray-workshop
 ```
 
 #### Initialize Terraform
