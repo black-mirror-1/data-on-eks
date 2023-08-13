@@ -82,6 +82,8 @@ locals {
   azs                = slice(data.aws_availability_zones.available.names, 0, 3)
 
   cluster_version = var.eks_cluster_version
+  
+  kuberay_helm_version = var.kuberay_helm_version
 
   tags = {
     Blueprint  = local.name
@@ -317,7 +319,7 @@ module "eks_blueprints_addons" {
       name             = "kuberay-operator"
       repository       = "https://ray-project.github.io/kuberay-helm/"
       chart            = "kuberay-operator"
-      version          = "0.5.0"
+      version          = local.kuberay_helm_version
     }
   }
 

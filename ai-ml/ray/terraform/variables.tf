@@ -15,3 +15,9 @@ variable "eks_cluster_version" {
   default     = "1.26"
   type        = string
 }
+
+variable "kuberay_helm_version" {
+  description = "Kuberay Hel Chart Version"
+  default     = "0.6.0"
+  type        = string
+}
