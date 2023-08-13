@@ -95,6 +95,15 @@ locals {
 # EKS Cluster
 #---------------------------------------------------------------
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  filter {
+    name   = "name"
+    values = ["ubuntu-eks/k8s_${module.eks.cluster_version}/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+  owners = ["099720109477"]
+}
+
 #tfsec:ignore:aws-eks-enable-control-plane-logging
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -149,7 +158,7 @@ module "eks" {
       #    # Reference https://aws.github.io/aws-eks-best-practices/reliability/docs/networkmanagement/#cni-custom-networking
       #    AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG = "true"
       #    ENI_CONFIG_LABEL_DEF               = "topology.kubernetes.io/zone"
-#
+      #
       #    # Reference docs https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
       #    ENABLE_PREFIX_DELEGATION = "true"
       #    WARM_PREFIX_TARGET       = "1"
@@ -171,6 +180,29 @@ module "eks" {
       min_size       = 3
       max_size       = 3
       desired_size   = 3
+      labels = {
+        "nvidia.com/gpu.deploy.operands" = false
+      }
+    }
+    gpu2 = {
+      instance_types = ["g5.12xlarge"]
+      ami_type       = "AL2_x86_64_GPU"
+      min_size       = 1
+      max_size       = 1
+      desired_size   = 1
+      iam_role_additional_policies = {
+        	AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      }
+      ebs_optimized = true
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size = 100
+            volume_type = "gp3"
+          }
+        }
+      }
     }
   }
 
@@ -321,6 +353,53 @@ module "eks_blueprints_addons" {
       chart            = "kuberay-operator"
       version          = local.kuberay_helm_version
     }
+    nvidia-device-plugin = {
+      namespace        = "nvidia-device-plugin"
+      create_namespace = true
+      name             = "nvidia-device-plugin"
+      repository       = "https://nvidia.github.io/k8s-device-plugin"
+      chart            = "nvidia-device-plugin"
+      version          = "0.14.0"
+      values = [
+        <<-EOT
+        gfd:
+          enabled: true
+        EOT
+      ]
+    }
+    #gpu-operator = {
+    #  description      = "A Helm chart for NVIDIA GPU operator"
+    #  namespace        = "gpu-operator"
+    #  create_namespace = true
+    #  chart            = "gpu-operator"
+    #  chart_version    = "v23.3.2"
+    #  repository       = "https://nvidia.github.io/gpu-operator"
+    #  values = [
+    #    <<-EOT
+    #      daemonsets:
+    #        priorityClassName: system-node-critical
+    #        tolerations:
+    #          - key: nvidia.com/gpu
+    #            operator: Exists
+    #            effect: NoSchedule
+    #          - operator: "Exists" # Added this to ensure it can tolerate any custom Taints added to the GPU nodes
+    #      operator:
+    #        defaultRuntime: containerd
+    #      node-feature-discovery:
+    #        enableNodeFeatureApi: true
+    #        worker:
+    #          tolerations:
+    #            - key: "node-role.kubernetes.io/master"
+    #              operator: "Equal"
+    #              value: ""
+    #              effect: "NoSchedule"
+    #            - key: nvidia.com/gpu
+    #              operator: Exists
+    #              effect: NoSchedule
+    #            - operator: "Exists" # Added this to ensure it can tolerate any custom Taints added to the GPU nodes
+    #    EOT
+    #  ]
+    #}
   }
 
   tags = local.tags

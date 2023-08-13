@@ -16,60 +16,60 @@ data "aws_caller_identity" "current" {}
 # Karpenter Configuration
 #---------------------------------------------------------------
 
-resource "kubectl_manifest" "karpenter_provisioner" {
-  yaml_body = yamlencode({
-    apiVersion = "karpenter.sh/v1alpha5"
-    kind       = "Provisioner"
-    metadata = {
-      name = var.ray_cluster_name
-    }
-    spec = {
-      ttlSecondsAfterEmpty = 30
-      #ttlSecondsUntilExpired = 600
-      requirements = [
-        {
-          key      = "karpenter.sh/capacity-type"
-          operator = "In"
-          values   = ["on-demand"]
-        }
-      ]
-      limits = {
-        resources = {
-          cpu = "1000"
-        }
-      }
-      providerRef = {
-        name = var.ray_cluster_name
-      }
-      labels = {
-        owner = var.ray_cluster_name
-      }
-    }
-  })
-}
-
-resource "kubectl_manifest" "karpenter_node_template" {
-  yaml_body = yamlencode({
-    apiVersion = "karpenter.k8s.aws/v1alpha1"
-    kind       = "AWSNodeTemplate"
-    metadata = {
-      name = var.ray_cluster_name
-    }
-    spec = {
-      subnetSelector = {
-        "karpenter.sh/discovery" = var.eks_cluster_name
-      }
-      securityGroupSelector = {
-        "karpenter.sh/discovery" = var.eks_cluster_name
-      }
-      tags = {
-        "ray-cluster/name"       = var.ray_cluster_name
-        "karpenter.sh/discovery" = var.eks_cluster_name
-      }
-    }
-  })
-}
-
+#resource "kubectl_manifest" "karpenter_provisioner" {
+#  yaml_body = yamlencode({
+#    apiVersion = "karpenter.sh/v1alpha5"
+#    kind       = "Provisioner"
+#    metadata = {
+#      name = var.ray_cluster_name
+#    }
+#    spec = {
+#      ttlSecondsAfterEmpty = 30
+#      #ttlSecondsUntilExpired = 600
+#      requirements = [
+#        {
+#          key      = "karpenter.sh/capacity-type"
+#          operator = "In"
+#          values   = ["on-demand"]
+#        }
+#      ]
+#      limits = {
+#        resources = {
+#          cpu = "1000"
+#        }
+#      }
+#      providerRef = {
+#        name = var.ray_cluster_name
+#      }
+#      labels = {
+#        owner = var.ray_cluster_name
+#      }
+#    }
+#  })
+#}
+#
+#resource "kubectl_manifest" "karpenter_node_template" {
+#  yaml_body = yamlencode({
+#    apiVersion = "karpenter.k8s.aws/v1alpha1"
+#    kind       = "AWSNodeTemplate"
+#    metadata = {
+#      name = var.ray_cluster_name
+#    }
+#    spec = {
+#      subnetSelector = {
+#        "karpenter.sh/discovery" = var.eks_cluster_name
+#      }
+#      securityGroupSelector = {
+#        "karpenter.sh/discovery" = var.eks_cluster_name
+#      }
+#      tags = {
+#        "ray-cluster/name"       = var.ray_cluster_name
+#        "karpenter.sh/discovery" = var.eks_cluster_name
+#      }
+#    }
+#  })
+#}
+#
 
 #---------------------------------------------------------------
 # Namespace Resources

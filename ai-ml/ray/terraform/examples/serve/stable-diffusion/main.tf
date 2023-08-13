@@ -34,25 +34,20 @@ data "aws_eks_cluster" "this" {
 
 locals {
   region      = var.region
-  name        = "sleepy-pid"
+  name        = "stable-diffusion"
   eks_cluster = "ray-cluster"
 }
 
-module "sleepy_pid_service" {
+module "stable_diffusion_service" {
   source = "../../../modules/ray-service"
 
   namespace        = local.name
   ray_cluster_name = local.name
   eks_cluster_name = local.eks_cluster
   serve_config = yamldecode(<<EOF
-importPath: "sleepy_pid:app"
+importPath: "stable_diffusion:entrypoint"
 runtimeEnv: |
-  working_dir: "https://github.com/ray-project/serve_config_examples/archive/42d10bab77741b40d11304ad66d39a4ec2345247.zip"
-deployments:
-  - name: SleepyPid
-    numReplicas: 6
-    rayActorOptions:
-      numCpus: 0
+  working_dir: "https://github.com/askulkarni2/ray-demo/raw/main/src.zip"
 EOF
   )
 }

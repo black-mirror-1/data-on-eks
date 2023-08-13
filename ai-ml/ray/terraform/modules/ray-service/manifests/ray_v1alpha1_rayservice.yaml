@@ -12,7 +12,7 @@ headGroupSpec:
     spec:
       containers:
         - name: ray-head
-          image: rayproject/ray:2.5.0
+          image: 829527579886.dkr.ecr.us-west-2.amazonaws.com/ray/stable-diffusion-demo:latest
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -36,8 +36,8 @@ headGroupSpec:
                 secretKeyRef:
                   name: redis-secret
                   key: host
-      nodeSelector:
-        owner: ${ray_cluster_name}
+      #nodeSelector:
+      #  owner: ${ray_cluster_name}
 workerGroupSpecs:
   # the pod replicas in this group typed worker
   - replicas: 3
@@ -51,7 +51,7 @@ workerGroupSpecs:
       spec:
         containers:
           - name: ray-worker
-            image: rayproject/ray:2.5.0
+            image: 829527579886.dkr.ecr.us-west-2.amazonaws.com/ray/stable-diffusion-demo:latest
             imagePullPolicy: IfNotPresent
             lifecycle:
               preStop:
@@ -59,20 +59,22 @@ workerGroupSpecs:
                   command: ["/bin/sh","-c","ray stop"]
             resources:
               limits:
-                cpu: "1"
-                memory: "2Gi"
+                cpu: "2"
+                memory: "16Gi"
+                nvidia.com/gpu:  1
               requests:
-                cpu: "500m"
-                memory: "2Gi"
-        nodeSelector:
-          owner: ${ray_cluster_name}
-        topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: "topology.kubernetes.io/zone"
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              ray.io/node-type: worker
+                cpu: "2"
+                memory: "16Gi"
+                nvidia.com/gpu:  1
+        #nodeSelector:
+        #  owner: ${ray_cluster_name}
+        #topologySpreadConstraints:
+        #- maxSkew: 1
+        #  topologyKey: "topology.kubernetes.io/zone"
+        #  whenUnsatisfiable: ScheduleAnyway
+        #  labelSelector:
+        #    matchLabels:
+        #      ray.io/node-type: worker
         #affinity:
         #  podAntiAffinity:
         #    requiredDuringSchedulingIgnoredDuringExecution:
