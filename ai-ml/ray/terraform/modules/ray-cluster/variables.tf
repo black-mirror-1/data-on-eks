@@ -16,7 +16,8 @@ variable "namespace" {
 variable "ray_cluster_version" {
   description = "Version for the Ray Cluster"
   type        = string
-  default     = "2.4.0"
+  # default     = "2.4.0"
+  default     = "0.6.0"
 }
 
 variable "helm_values" {

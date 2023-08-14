@@ -50,7 +50,7 @@ module "pytorch_cluster" {
       image = {
         repository = "rayproject/ray-ml"
         # This is a different version than the xgboost version
-        tag        = "2.3.0"
+        tag        = "2.6.1"
         pullPolicy = "IfNotPresent"
       }
       head = {

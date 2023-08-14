@@ -184,26 +184,27 @@ module "eks" {
         "nvidia.com/gpu.deploy.operands" = false
       }
     }
-    gpu2 = {
-      instance_types = ["g5.12xlarge"]
-      ami_type       = "AL2_x86_64_GPU"
-      min_size       = 1
-      max_size       = 1
-      desired_size   = 1
-      iam_role_additional_policies = {
-        	AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-      }
-      ebs_optimized = true
-      block_device_mappings = {
-        xvda = {
-          device_name = "/dev/xvda"
-          ebs = {
-            volume_size = 100
-            volume_type = "gp3"
-          }
-        }
-      }
-    }
+    # Enbable this to use GPUs with your account
+    # gpu2 = {
+    #   instance_types = ["g5.12xlarge"]
+    #   ami_type       = "AL2_x86_64_GPU"
+    #   min_size       = 1
+    #   max_size       = 1
+    #   desired_size   = 1
+    #   iam_role_additional_policies = {
+    #     	AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    #   }
+    #   ebs_optimized = true
+    #   block_device_mappings = {
+    #     xvda = {
+    #       device_name = "/dev/xvda"
+    #       ebs = {
+    #         volume_size = 100
+    #         volume_type = "gp3"
+    #       }
+    #     }
+    #   }
+    # }
   }
 
   tags = merge(local.tags, {
@@ -353,20 +354,20 @@ module "eks_blueprints_addons" {
       chart            = "kuberay-operator"
       version          = local.kuberay_helm_version
     }
-    nvidia-device-plugin = {
-      namespace        = "nvidia-device-plugin"
-      create_namespace = true
-      name             = "nvidia-device-plugin"
-      repository       = "https://nvidia.github.io/k8s-device-plugin"
-      chart            = "nvidia-device-plugin"
-      version          = "0.14.0"
-      values = [
-        <<-EOT
-        gfd:
-          enabled: true
-        EOT
-      ]
-    }
+    # nvidia-device-plugin = {
+    #   namespace        = "nvidia-device-plugin"
+    #   create_namespace = true
+    #   name             = "nvidia-device-plugin"
+    #   repository       = "https://nvidia.github.io/k8s-device-plugin"
+    #   chart            = "nvidia-device-plugin"
+    #   version          = "0.14.0"
+    #   values = [
+    #     <<-EOT
+    #     gfd:
+    #       enabled: true
+    #     EOT
+    #   ]
+    # }
     #gpu-operator = {
     #  description      = "A Helm chart for NVIDIA GPU operator"
     #  namespace        = "gpu-operator"
